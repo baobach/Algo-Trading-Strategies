@@ -9,3 +9,7 @@ The first task is to connect to the brooker's APIs and start to retrive market d
 ## Trade logics
 
 Create trade logics by implementing trader's trategies like EMA, RSI etc. Backtesting the trade logic and analyze the PnL
+
+## Testing the pull request
+
+This is updated
