@@ -13,3 +13,5 @@ Create trade logics by implementing trader's trategies like EMA, RSI etc. Backte
 ## Testing the pull request
 
 Mansoor has completed pull request
+
+Adding some changes
