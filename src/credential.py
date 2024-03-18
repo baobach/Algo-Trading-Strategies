@@ -1,0 +1,12 @@
+client_id = '78E30P6HOJ-100' 
+secret_key = '0XI8PTVQJY'
+redirect_uri = 'https://www.google.com/'
+user_name = 'XM26206'
+totp_key = 'LUKCPAFEEHWWZNSNWJMW33TI75OEOEK4'
+pin1 = "4"
+pin2 = "5"
+pin3 = "1"
+pin4 = "7"
+response_type = 'code'
+state = 'sample_state'
+grant_type = "authorization_code" 
