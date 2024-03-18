@@ -10,3 +10,4 @@ pin4 = "7"
 response_type = 'code'
 state = 'sample_state'
 grant_type = "authorization_code" 
+test = "test"
