@@ -23,7 +23,12 @@ class Settings(BaseSettings):
 
     client_id: str
     secret_key: str
-    auth_code: str
+    user_name: str
+    totp_key: str
+    pin1: str
+    pin2: str
+    pin3: str
+    pin4: str
 
     class Config:
         env_file = return_full_path(".env")
