@@ -41,11 +41,11 @@ class BrokerConnection:
         # Initialize a Chrome webdriver
         driver = webdriver.Chrome()
 
-        #options = Options()
-        #options.add_argument('--headless=new')
+        # options = Options()
+        # options.add_argument('--headless=new')
 
-        #Initializing Chrome Webdriver
-        #driver = webdriver.Chrome(options=options)
+        # # Initializing Chrome Webdriver
+        # driver = webdriver.Chrome(options=options)
 
 
         # Open the URL using the webdriver
@@ -58,7 +58,7 @@ class BrokerConnection:
         time.sleep(1)
         client_id_x_path='//*[@id="fy_client_id"]'
         elem2 = driver.find_element(By.XPATH, client_id_x_path)
-        elem2.send_keys("XM26206")
+        elem2.send_keys(Settings().user_name)
         elem2.send_keys(Keys.RETURN)
         time.sleep(1)
 

@@ -1,21 +1,18 @@
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 import sys
-sys.path.append("/Users/baobach/Backtesting-Algo-Trading")
+sys.path.append("/Users/baobach/Algo-Trading-Strategies")
 import backtrader as bt
-from src.strategy import PairsTradingStrategy, SimpleMovingAverage, SimpleRSI
+import pandas as pd
+from src.strategies import *
 from src.analyzer import AnalyzerSuite
-from src.data_manager import DataManager
 
 if __name__ == '__main__':
     # ------------------------------------------------------------------------------------
     # Create a cerebro entity
     cerebro = bt.Cerebro()
-    data = DataManager()
+    data = bt.feeds.YahooFinanceCSVData(dataname = './data/raw/BTCUSDT_15min.csv')
+    cerebro.adddata(data)
     # Add a strategy
-    tickers = ['AAPL']
     cerebro.addstrategy(SimpleRSI)
-    data.cerebro_add_data(tickers=tickers, cerebro=cerebro)
 
     # Set our desired cash start
     cerebro.broker.setcash(100_000.0)
