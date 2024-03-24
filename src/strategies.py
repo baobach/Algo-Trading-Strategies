@@ -12,6 +12,7 @@ class EMA_BUY(bt.Strategy):
     params = (
         ('maperiod', 5),
         ('printlog', False),
+        ('trailpercent', 0.0),
     )
 
     def log(self, txt, dt=None, doprint=False):
@@ -79,16 +80,30 @@ class EMA_BUY(bt.Strategy):
         # Simply log the closing price of the series from the reference
         self.log('Close, %.2f' % self.dataclose[0])
 
+        # Check if this candle is an alert candle
+        if self.ema[0] > self.datahigh[0]:
+            self.log('Alert close, %.2f' % self.dataclose[0])
+            self.alert = self.datas[0]
+
         # Check if an order is pending ... if yes, we cannot send a 2nd one
         if self.order:
             return
 
         # Check if we are in the market
         if not self.position:
-
-            # Find the alert candle
-            if self.ema[0] > self.datahigh[0]:
-                return
+            # Check if we have an alert candle
+            if self.alert =! None:
+                # Check the buy condition for current `H` vs alert candle `H`
+                if self.datas[0].high > self.alert.high:
+                    self.log('BUY CREATE, %.2f' % self.dataclose[0])
+                    self.order = self.buy(size = 1, exectype=bt.Order.StopTrail, trailpercent = self.params.trailpercent)
+                    self.stoploss = self.dataclose[0]*0.99
+                    self.alert = None
+        else:
+            if self.dataclose[0] < self.stoploss:
+                self.log('SELL CREATE, %.2f' % self.dataclose[0])
+                self.order = self.sell(size = 1)
+                    
 
 class SimpleRSI(bt.Strategy):
     params = (
