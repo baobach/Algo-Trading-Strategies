@@ -1,7 +1,6 @@
 import sys
 
 sys.path.append(r"C:\Users\slsak\OneDrive\Documents\GitHub\Algo-Trading-Strategies")
-sys.path.append("../Algo-Trading-Strategies")
 import backtrader as bt
 import pandas as pd
 from src.strategies import *
@@ -12,7 +11,7 @@ if __name__ == "__main__":
     # Create a cerebro entity
     cerebro = bt.Cerebro()
     data = bt.feeds.GenericCSVData(
-        dataname="./data/raw/niftybank.csv",
+        dataname="./data/raw/BTCUSDT_1hour.csv",
         # fromdate = pd.Timestamp('2021-01-01'),
         # todate = pd.Timestamp('2021-05-05'),
         datetime=0,
@@ -25,7 +24,7 @@ if __name__ == "__main__":
     )
     cerebro.adddata(data)
     # Add a strategy
-    cerebro.addstrategy(BuyAndHold)
+    cerebro.addstrategy(EMA_BUY)
     # # Add log export
     # cerebro.addwriter(bt.WriterFile, csv=True, out = 'log.csv')
 
