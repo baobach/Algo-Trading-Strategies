@@ -12,7 +12,7 @@ class EMA_BUY(bt.Strategy):
     params = (
         ('maperiod', 5),
         ('printlog', False),
-        ('trailpercent', 0.0),
+        ('trailpercent', 0.02),
     )
 
     def log(self, txt, dt=None, doprint=False):
@@ -33,7 +33,10 @@ class EMA_BUY(bt.Strategy):
         self.buycomm = None
 
         # Add alert candle
-        self.alert = None
+        self.alert_candle = False
+
+        # Add size of buy and sell order
+        self.size = 0
 
         # Add a EMA indicator
         self.ema = btind.ExponentialMovingAverage(period=self.params.maperiod)
@@ -82,8 +85,10 @@ class EMA_BUY(bt.Strategy):
 
         # Check if this candle is an alert candle
         if self.ema[0] > self.datahigh[0]:
-            self.log('Alert close, %.2f' % self.dataclose[0])
-            self.alert = self.datas[0]
+            self.log('Alert Candle, %.2f' % self.dataclose[0])
+            self.alert_candle = True
+            self.alert_high = self.datahigh[0]
+            self.alert_low = self.datalow[0]
 
         # Check if an order is pending ... if yes, we cannot send a 2nd one
         if self.order:
@@ -92,18 +97,44 @@ class EMA_BUY(bt.Strategy):
         # Check if we are in the market
         if not self.position:
             # Check if we have an alert candle
-            if self.alert =! None:
+            if self.alert_candle:
                 # Check the buy condition for current `H` vs alert candle `H`
-                if self.datas[0].high > self.alert.high:
+                if self.datas[0].high > self.alert_high:
                     self.log('BUY CREATE, %.2f' % self.dataclose[0])
-                    self.order = self.buy(size = 1, exectype=bt.Order.StopTrail, trailpercent = self.params.trailpercent)
-                    self.stoploss = self.dataclose[0]*0.99
-                    self.alert = None
+                    # Buy all the available cash
+                    self.size = int(self.broker.get_cash() / self.dataclose[0])
+                    self.order = self.buy(size = self.size)
+                    self.stoploss = self.alert_low
+                    self.takeprofit = self.alert_high + 3*(self.alert_high-self.alert_low)
+                    self.alert_candle = False
         else:
             if self.dataclose[0] < self.stoploss:
-                self.log('SELL CREATE, %.2f' % self.dataclose[0])
-                self.order = self.sell(size = 1)
-                    
+                self.log('STOP LOSS, %.2f' % self.dataclose[0])
+                self.order = self.sell(size = self.size)
+            elif self.dataclose[0] > self.takeprofit:
+                # Traling profit
+                temp = self.takeprofit + (self.alert_high - self.stoploss)
+                stoploss = self.takeprofit
+                takeprofit = temp
+                if self.dataclose[0] > takeprofit:
+                    temp = takeprofit + (takeprofit - stoploss)
+                else:
+                    self.log('TAKE PROFIT, %.2f' % self.dataclose[0])
+                    self.order = self.sell(size = self.size)                                
+
+class BuyAndHold(bt.Strategy):
+    def start(self):
+        self.val_start = self.broker.get_cash()  # keep the starting cash
+
+    def nextstart(self):
+        # Buy all the available cash
+        size = int(self.broker.get_cash() / self.data)
+        self.buy(size=size)
+
+    def stop(self):
+        # calculate the actual returns
+        self.roi = (self.broker.get_value() / self.val_start) - 1.0
+        print('ROI:        {:.2f}%'.format(100.0 * self.roi))
 
 class SimpleRSI(bt.Strategy):
     params = (
@@ -172,10 +203,14 @@ class SimpleRSI(bt.Strategy):
                 # BUY, BUY, BUY!!! (with all possible default parameters)
                 self.log('BUY CREATE, %.2f' % self.dataclose[0])
                 # Keep track of the created order to avoid a 2nd order
-                self.order = self.buy()
+                size = self.broker.getvalue() / self.dataclose[0]
+                self.order = self.buy(size = size)
+                self.stoploss = self.dataclose[0]*0.99
+                self.takeprofit = self.dataclose[0]*1.03
         else:
-            if  self.rsi[0] < 40:
-                # SELL, SELL, SELL!!! (with all possible default parameters)
-                self.log('SELL CREATE, %.2f' % self.dataclose[0])
-                # Keep track of the created order to avoid a 2nd order
-                self.order = self.sell()
+            if self.dataclose[0] < self.stoploss:
+                self.log('STOP LOSS, %.2f' % self.dataclose[0])
+                self.order = self.sell(size=self.position.size)
+            elif self.dataclose[0] > self.takeprofit:
+                self.log('TAKE PROFIT, %.2f' % self.dataclose[0])
+                self.order = self.sell(size=self.position.size)

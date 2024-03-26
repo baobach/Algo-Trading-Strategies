@@ -9,10 +9,23 @@ if __name__ == '__main__':
     # ------------------------------------------------------------------------------------
     # Create a cerebro entity
     cerebro = bt.Cerebro()
-    data = bt.feeds.YahooFinanceCSVData(dataname = './data/raw/BTCUSDT_15min.csv')
+    data = bt.feeds.GenericCSVData(
+        dataname = './data/raw/niftybank.csv',
+        # fromdate = pd.Timestamp('2021-01-01'),
+        # todate = pd.Timestamp('2021-05-05'),
+        datetime=0,
+        high=1,
+        low=2,
+        open=3,
+        close=4,
+        volume=5,
+        openinterest=-1
+        )
     cerebro.adddata(data)
     # Add a strategy
-    cerebro.addstrategy(SimpleRSI)
+    cerebro.addstrategy(EMA_BUY)
+    # # Add log export
+    # cerebro.addwriter(bt.WriterFile, csv=True, out = 'log.csv')
 
     # Set our desired cash start
     cerebro.broker.setcash(100_000.0)
@@ -26,7 +39,7 @@ if __name__ == '__main__':
     # Analyzer
     AnalyzerSuite.defineAnalyzers(AnalyzerSuite,cerebro)
     # Run over everything
-    thestrats = cerebro.run(stdstats=True)
+    thestrats = cerebro.run()
 
     # -----------------------------------------------------------------------------------
 
