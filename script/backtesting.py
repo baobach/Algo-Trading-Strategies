@@ -1,17 +1,25 @@
+import os
 import sys
-
-sys.path.append(r"C:\Users\slsak\OneDrive\Documents\GitHub\Algo-Trading-Strategies")
 import backtrader as bt
 import pandas as pd
+
+# Get the directory of the current script
+script_dir = os.path.dirname(os.path.realpath(__file__))
+
+# Add the parent directory to the system path
+sys.path.append(os.path.join(script_dir, '..'))
+
 from src.strategies import *
 from src.analyzer import AnalyzerSuite
+
+dataname = "./data/raw/BTCUSDT_1hour.csv"
 
 if __name__ == "__main__":
     # ------------------------------------------------------------------------------------
     # Create a cerebro entity
     cerebro = bt.Cerebro()
     data = bt.feeds.GenericCSVData(
-        dataname="./data/raw/BTCUSDT_1hour.csv",
+        dataname=dataname,
         # fromdate = pd.Timestamp('2021-01-01'),
         # todate = pd.Timestamp('2021-05-05'),
         datetime=0,
