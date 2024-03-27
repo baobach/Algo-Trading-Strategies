@@ -1,12 +1,16 @@
 import os
 import sys
 from fyers_apiv3 import fyersModel
+
+# Get the directory of the current script
+script_dir = os.path.dirname(os.path.realpath(__file__))
+
+# Add the parent directory to the system path
+sys.path.append(os.path.join(script_dir, '..'))
 import pandas as pd
 import numpy as np
 import datetime as dt
-# Add the path of the src folder to the sys.path list
-src_path = "/Users/baobach/Algo-Trading-Strategies/src"
-sys.path.append(src_path)
+
 from src.broker_connection import BrokerConnection
 from src.config import Settings
 
