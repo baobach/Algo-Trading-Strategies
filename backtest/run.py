@@ -2,14 +2,8 @@ import os
 import sys
 import backtrader as bt
 import pandas as pd
-
-# Get the directory of the current script
-script_dir = os.path.dirname(os.path.realpath(__file__))
-# Add the parent directory to the system path
-sys.path.append(os.path.join(script_dir, '..'))
-
-from backtest.algos.strategies import *
-from backtest.util.analyzer import AnalyzerSuite
+from util.analyzer import AnalyzerSuite
+from algos.strategies import *
 
 dataname = "./data/raw/5EMA_45BN.csv"
 
