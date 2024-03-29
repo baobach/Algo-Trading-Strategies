@@ -5,7 +5,7 @@ import pandas as pd
 from util.analyzer import AnalyzerSuite
 from algos.strategies import *
 
-dataname = "./data/raw/5EMA_45BN.csv"
+dataname = "./data/raw/niftybank.csv"
 
 if __name__ == "__main__":
     # ------------------------------------------------------------------------------------
@@ -20,7 +20,7 @@ if __name__ == "__main__":
         high=2,
         low=3,
         close=4,
-        volume=-1,
+        volume=5,
         openinterest=-1,
     )
     cerebro.adddata(data)

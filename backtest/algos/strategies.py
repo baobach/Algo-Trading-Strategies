@@ -111,7 +111,7 @@ class EMA_BUY(bt.Strategy):
         else:
             if self.dataclose[0] < self.stoploss:
                 self.log('STOP LOSS, %.2f' % self.dataclose[0])
-                self.order = self.sell(size = self.size)
+                self.order = self.close()
             elif self.dataclose[0] > self.takeprofit:
                 # Traling profit
                 temp = self.takeprofit + (self.alert_high - self.stoploss)
@@ -121,7 +121,7 @@ class EMA_BUY(bt.Strategy):
                     temp = takeprofit + (takeprofit - stoploss)
                 else:
                     self.log('TAKE PROFIT, %.2f' % self.dataclose[0])
-                    self.order = self.sell(size = self.size)                                
+                    self.order = self.close()                                
 
 class BuyAndHold(bt.Strategy):
     def start(self):
