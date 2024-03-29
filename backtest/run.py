@@ -5,14 +5,13 @@ import pandas as pd
 
 # Get the directory of the current script
 script_dir = os.path.dirname(os.path.realpath(__file__))
-
 # Add the parent directory to the system path
 sys.path.append(os.path.join(script_dir, '..'))
 
-from src.strategies import *
-from src.analyzer import AnalyzerSuite
+from backtest.algos.strategies import *
+from backtest.util.analyzer import AnalyzerSuite
 
-dataname = "./data/raw/BTCUSDT_1hour.csv"
+dataname = "./data/raw/5EMA_45BN.csv"
 
 if __name__ == "__main__":
     # ------------------------------------------------------------------------------------
@@ -27,7 +26,7 @@ if __name__ == "__main__":
         high=2,
         low=3,
         close=4,
-        volume=5,
+        volume=-1,
         openinterest=-1,
     )
     cerebro.adddata(data)

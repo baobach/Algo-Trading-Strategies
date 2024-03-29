@@ -11,8 +11,8 @@ import pandas as pd
 import numpy as np
 import datetime as dt
 
-from src.broker_connection import BrokerConnection
-from src.config import Settings
+from apis.fyers import BrokerConnection
+from apis.config import Settings
 
 # Instantiate the credential
 settings = Settings()
