@@ -1,4 +1,3 @@
-# Trade logics use for backtesting and live trading
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 import argparse
 import datetime
@@ -9,6 +8,22 @@ import backtrader.indicators as btind
 import math
 
 class EMA_BUY(bt.Strategy):
+    """
+    A strategy that uses Exponential Moving Average (EMA) to generate buy signals.
+
+    Parameters:
+    - maperiod (int): The period for the EMA indicator.
+    - printlog (bool): Flag to enable/disable logging.
+    - trailpercent (float): The percentage used to set the stop loss and take profit levels.
+
+    This strategy waits for an alert candle, which is defined as a candle where the EMA value is higher than the high price.
+    When an alert candle occurs, the strategy checks if the current high price is higher than the alert candle's high price.
+    If it is, a buy order is created with the size calculated based on the available cash.
+    The stop loss is set at the alert candle's low price, and the take profit is set at the alert candle's high price plus 3 times the difference between the high and low prices.
+    If the price reaches the stop loss level, the position is closed. If it reaches the take profit level, the take profit level is updated using a trailing profit mechanism.
+
+    """
+
     params = (
         ('maperiod', 5),
         ('printlog', False),
@@ -34,6 +49,9 @@ class EMA_BUY(bt.Strategy):
 
         # Add alert candle
         self.alert_candle = False
+
+        # Add start value
+        self.val_start = self.broker.get_value()
 
         # Add size of buy and sell order
         self.size = 0
@@ -121,97 +139,9 @@ class EMA_BUY(bt.Strategy):
                     temp = takeprofit + (takeprofit - stoploss)
                 else:
                     self.log('TAKE PROFIT, %.2f' % self.dataclose[0])
-                    self.order = self.close()                                
-
-class BuyAndHold(bt.Strategy):
-    def start(self):
-        self.val_start = self.broker.get_cash()  # keep the starting cash
-
-    def nextstart(self):
-        # Buy all the available cash
-        size = int(self.broker.get_cash() / self.data)
-        self.buy(size=size)
+                    self.order = self.close()  
 
     def stop(self):
         # calculate the actual returns
         self.roi = (self.broker.get_value() / self.val_start) - 1.0
-        print('ROI:        {:.2f}%'.format(100.0 * self.roi))
-
-class SimpleRSI(bt.Strategy):
-    params = (
-        ('printlog', True),
-        ('period', 14),
-        ('upperband', 60.0),
-        ('lowerband', 40.0),
-    )
-
-    def __init__(self):
-        self.dataclose = self.datas[0].close
-        # To keep track of pending orders and buy price/commission
-        self.order = None
-        self.buyprice = None
-        self.buycomm = None
-        # Add a RSI indicator
-        self.rsi = btind.RelativeStrengthIndex(period=self.params.period, upperband=self.params.upperband, lowerband=self.params.lowerband)
-
-    def log(self, txt, dt=None, doprint=False):
-        if self.params.printlog or doprint:
-            dt = dt or self.datas[0].datetime.date(0)
-            print('%s, %s' % (dt.isoformat(), txt))
-
-    def notify_order(self, order):
-        if order.status in [order.Submitted, order.Accepted]:
-            # Buy/Sell order submitted/accepted to/by broker - Nothing to do
-            return
-
-        # Check if an order has been completed
-        # Attention: broker could reject order if not enough cash
-        if order.status in [order.Completed]:
-            if order.isbuy():
-                self.log(
-                    'BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
-                    (order.executed.price,
-                     order.executed.value,
-                     order.executed.comm))
-
-                self.buyprice = order.executed.price
-                self.buycomm = order.executed.comm
-            else:  # Sell
-                self.log('SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
-                         (order.executed.price,
-                          order.executed.value,
-                          order.executed.comm))
-
-            self.bar_executed = len(self)
-
-        elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-            self.log('Order Canceled/Margin/Rejected')
-
-        self.order = None
-
-    def next(self):
-        # Simply log the closing price of the series from the reference
-        self.log('Close, %.2f' % self.dataclose[0])
-
-        # Check for open orders
-        if self.order:
-            return
-
-        # Check if we are not in the market
-        if not self.position:
-            # Not yet ... we MIGHT BUY if ...
-            if self.rsi[0] > 60:
-                # BUY, BUY, BUY!!! (with all possible default parameters)
-                self.log('BUY CREATE, %.2f' % self.dataclose[0])
-                # Keep track of the created order to avoid a 2nd order
-                size = self.broker.getvalue() / self.dataclose[0]
-                self.order = self.buy(size = size)
-                self.stoploss = self.dataclose[0]*0.99
-                self.takeprofit = self.dataclose[0]*1.03
-        else:
-            if self.dataclose[0] < self.stoploss:
-                self.log('STOP LOSS, %.2f' % self.dataclose[0])
-                self.order = self.sell(size=self.position.size)
-            elif self.dataclose[0] > self.takeprofit:
-                self.log('TAKE PROFIT, %.2f' % self.dataclose[0])
-                self.order = self.sell(size=self.position.size)
+        print('ROI:        {:.2f}%'.format(100.0 * self.roi))                    

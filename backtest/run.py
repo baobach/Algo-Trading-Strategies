@@ -3,50 +3,58 @@ import sys
 import backtrader as bt
 import pandas as pd
 from util.analyzer import AnalyzerSuite
-from algos.strategies import *
+from strategies.LongOnly import *
 
-dataname = "./data/raw/niftybank.csv"
+strategy = Long4
 
-if __name__ == "__main__":
-    # ------------------------------------------------------------------------------------
-    # Create a cerebro entity
-    cerebro = bt.Cerebro()
-    data = bt.feeds.GenericCSVData(
-        dataname=dataname,
-        # fromdate = pd.Timestamp('2021-01-01'),
-        # todate = pd.Timestamp('2021-05-05'),
-        datetime=0,
-        open=1,
-        high=2,
-        low=3,
-        close=4,
-        volume=5,
-        openinterest=-1,
-    )
-    cerebro.adddata(data)
-    # Add a strategy
-    cerebro.addstrategy(EMA_BUY)
-    # # Add log export
-    # cerebro.addwriter(bt.WriterFile, csv=True, out = 'log.csv')
+dataname = "./data/raw/BTCUSDT_1hour.csv"
 
-    # Set our desired cash start
-    cerebro.broker.setcash(100_000.0)
-    # Set the commission
-    # cerebro.broker.setcommission(commission=0.001)
+# Create a cerebro entity
+cerebro = bt.Cerebro()
+data = bt.feeds.GenericCSVData(
+    dataname=dataname,
+    fromdate = pd.Timestamp('2021-01-01'),
+    todate = pd.Timestamp('2021-05-05'),
+    # Check column names for the data feed
+    datetime=0,
+    open=1,
+    high=2,
+    low=3,
+    close=4,
+    volume=6,
+    openinterest=5,
+)
 
-    # ------------------------------------------------------------------------------------
+# Set the colors of the bar plot
+data.plotinfo.plot = True
+data.plotinfo.barup = "green"
+data.plotinfo.bardown = "red"
 
-    # Print out the starting conditions
-    print("Starting Portfolio Value: %.2f" % cerebro.broker.getvalue())
-    # Analyzer
-    AnalyzerSuite.defineAnalyzers(AnalyzerSuite, cerebro)
-    # Run over everything
-    thestrats = cerebro.run()
+# Add the Data Feed to Cerebro
+cerebro.adddata(data)
+# Add a strategy
+cerebro.addstrategy(strategy, printlog=False)
+# # Add log export
+# cerebro.addwriter(bt.WriterFile, csv=True, out = 'log.csv')
 
-    # -----------------------------------------------------------------------------------
+# Set our desired cash start
+cerebro.broker.setcash(100_000.0)
+# Set the commission
+# cerebro.broker.setcommission(commission=0.001)
 
-    print(AnalyzerSuite.returnAnalyzers(AnalyzerSuite, thestrats))
-    # Print out the final result
-    print("Final Portfolio Value: %.2f" % cerebro.broker.getvalue())
-    # Plot the result
-    cerebro.plot()
+# ------------------------------------------------------------------------------------
+
+# Print out the starting conditions
+print("Starting Portfolio Value: %.2f" % cerebro.broker.getvalue())
+# Analyzer
+AnalyzerSuite.defineAnalyzers(AnalyzerSuite, cerebro)
+# Run over everything
+thestrats = cerebro.run()
+
+# -----------------------------------------------------------------------------------
+
+print(AnalyzerSuite.returnAnalyzers(AnalyzerSuite, thestrats))
+# Print out the final result
+print("Final Portfolio Value: %.2f" % cerebro.broker.getvalue())
+# Plot the result
+cerebro.plot()
