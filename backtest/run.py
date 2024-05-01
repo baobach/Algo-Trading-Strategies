@@ -8,7 +8,7 @@ import quantstats
 
 strategy = EMA_BUY
 
-dataname = "./data/raw/5EMA_5BN.csv"
+dataname = "./data/raw/5EMA_45BN.csv"
 
 # Create a cerebro entity
 cerebro = bt.Cerebro()
@@ -49,7 +49,7 @@ cerebro.broker.setcash(100_000.0)
 print("Starting Portfolio Value: %.2f" % cerebro.broker.getvalue())
 # Analyzer
 # AnalyzerSuite.defineAnalyzers(AnalyzerSuite, cerebro)
-cerebro.addanalyzer(bt.analyzers.PyFolio, _name='PyFolio')
+cerebro.addanalyzer(bt.analyzers.PyFolio, _name="PyFolio")
 
 # Run over everything
 thestrats = cerebro.run()
@@ -57,15 +57,15 @@ strat = thestrats[0]
 
 # -----------------------------------------------------------------------------------
 
-# print(AnalyzerSuite.returnAnalyzers(AnalyzerSuite, thestrats))
-# # Print out the final result
-# print("Final Portfolio Value: %.2f" % cerebro.broker.getvalue())
-# # Plot the result
-# cerebro.plot()
+print(AnalyzerSuite.returnAnalyzers(AnalyzerSuite, thestrats))
+# Print out the final result
+print("Final Portfolio Value: %.2f" % cerebro.broker.getvalue())
+# Plot the result
+cerebro.plot()
 
 # -----------------------------------------------------------------------------------
-# Quantstats
-portfolio_stats = strat.analyzers.getbyname('PyFolio')
-returns, positions, transactions, gross_lev = portfolio_stats.get_pf_items()
-returns.index = returns.index.tz_convert(None)
-quantstats.reports.html(returns, output='bn_strategy.html', title='BN Sentiment')
+# # Quantstats
+# portfolio_stats = strat.analyzers.getbyname("PyFolio")
+# returns, positions, transactions, gross_lev = portfolio_stats.get_pf_items()
+# returns.index = returns.index.tz_convert(None)
+# quantstats.reports.html(returns, output="bn_strategy.html", title="BN Sentiment")
