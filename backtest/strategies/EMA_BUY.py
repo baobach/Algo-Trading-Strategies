@@ -121,15 +121,14 @@ class EMA_BUY(bt.Strategy):
                 if self.datas[0].high > self.alert_high:
                     self.log('BUY CREATE, %.2f' % self.dataclose[0])
                     # Buy all the available cash
-                    self.size = int(self.broker.get_cash() / self.dataclose[0])
-                    self.order = self.buy(size = self.size)
+                    self.order = self.order_target_percent(target=0.95)
                     self.stoploss = self.alert_low
                     self.takeprofit = self.alert_high + 3*(self.alert_high-self.alert_low)
                     self.alert_candle = False
         else:
             if self.dataclose[0] < self.stoploss:
                 self.log('STOP LOSS, %.2f' % self.dataclose[0])
-                self.order = self.close()
+                self.order = self.order_target_percent(target=0)
             elif self.dataclose[0] > self.takeprofit:
                 # Traling profit
                 temp = self.takeprofit + (self.alert_high - self.stoploss)
@@ -139,7 +138,7 @@ class EMA_BUY(bt.Strategy):
                     temp = takeprofit + (takeprofit - stoploss)
                 else:
                     self.log('TAKE PROFIT, %.2f' % self.dataclose[0])
-                    self.order = self.close()  
+                    self.order = self.order_target_percent(target=0) 
 
     def stop(self):
         # calculate the actual returns
