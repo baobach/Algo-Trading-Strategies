@@ -4,28 +4,25 @@ import backtrader as bt
 import pandas as pd
 from util.analyzer import AnalyzerSuite
 from strategies.LongOnly import *
-from strategies.SimpleRSI import *
-from strategies.EMA_BUY import *
 
+strategy = Long4
 
-strategy = EMA_BUY
-
-dataname = "./data/raw/5EMA_1WBN.csv"
+dataname = "./data/raw/BTCUSDT_1hour.csv"
 
 # Create a cerebro entity
 cerebro = bt.Cerebro()
 data = bt.feeds.GenericCSVData(
     dataname=dataname,
-    # fromdate=pd.Timestamp("2021-01-01"),
-    # todate=pd.Timestamp("2021-05-05"),
+    fromdate = pd.Timestamp('2021-01-01'),
+    todate = pd.Timestamp('2021-05-05'),
     # Check column names for the data feed
     datetime=0,
     open=1,
     high=2,
     low=3,
     close=4,
-    volume=1,
-    openinterest=-1,
+    volume=6,
+    openinterest=5,
 )
 
 # Set the colors of the bar plot

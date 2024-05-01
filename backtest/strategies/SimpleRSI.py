@@ -101,3 +101,8 @@ class SimpleRSI(bt.Strategy):
             elif self.dataclose[0] > self.takeprofit:
                 self.log("TAKE PROFIT, %.2f" % self.dataclose[0])
                 self.order = self.sell(size=self.position.size)
+
+    def stop(self):
+        # calculate the actual returns
+        self.roi = (self.broker.get_value() / self.val_start) - 1.0
+        print('ROI:        {:.2f}%'.format(100.0 * self.roi))                
