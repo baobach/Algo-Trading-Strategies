@@ -1,12 +1,14 @@
 # Trade logics use for backtesting and live trading
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 import argparse
 import datetime
+
 # Algo trading libs
 import backtrader as bt
 import backtrader.feeds as btfeeds
 import backtrader.indicators as btind
 import math
+
 
 class SimpleRSI(bt.Strategy):
     """
@@ -18,12 +20,12 @@ class SimpleRSI(bt.Strategy):
         - upperband (float): Upper threshold for the RSI indicator (default: 60.0)
         - lowerband (float): Lower threshold for the RSI indicator (default: 40.0)
     """
-    
+
     params = (
-        ('printlog', True),
-        ('period', 14),
-        ('upperband', 60.0),
-        ('lowerband', 40.0),
+        ("printlog", True),
+        ("period", 14),
+        ("upperband", 60.0),
+        ("lowerband", 40.0),
     )
 
     def __init__(self):
@@ -33,12 +35,16 @@ class SimpleRSI(bt.Strategy):
         self.buyprice = None
         self.buycomm = None
         # Add a RSI indicator
-        self.rsi = btind.RelativeStrengthIndex(period=self.params.period, upperband=self.params.upperband, lowerband=self.params.lowerband)
+        self.rsi = btind.RelativeStrengthIndex(
+            period=self.params.period,
+            upperband=self.params.upperband,
+            lowerband=self.params.lowerband,
+        )
 
     def log(self, txt, dt=None, doprint=False):
         if self.params.printlog or doprint:
             dt = dt or self.datas[0].datetime.date(0)
-            print('%s, %s' % (dt.isoformat(), txt))
+            print("%s, %s" % (dt.isoformat(), txt))
 
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
@@ -50,29 +56,28 @@ class SimpleRSI(bt.Strategy):
         if order.status in [order.Completed]:
             if order.isbuy():
                 self.log(
-                    'BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
-                    (order.executed.price,
-                     order.executed.value,
-                     order.executed.comm))
+                    "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
+                    % (order.executed.price, order.executed.value, order.executed.comm)
+                )
 
                 self.buyprice = order.executed.price
                 self.buycomm = order.executed.comm
             else:  # Sell
-                self.log('SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
-                         (order.executed.price,
-                          order.executed.value,
-                          order.executed.comm))
+                self.log(
+                    "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
+                    % (order.executed.price, order.executed.value, order.executed.comm)
+                )
 
             self.bar_executed = len(self)
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-            self.log('Order Canceled/Margin/Rejected')
+            self.log("Order Canceled/Margin/Rejected")
 
         self.order = None
 
     def next(self):
         # Simply log the closing price of the series from the reference
-        self.log('Close, %.2f' % self.dataclose[0])
+        self.log("Close, %.2f" % self.dataclose[0])
 
         # Check for open orders
         if self.order:
@@ -83,21 +88,16 @@ class SimpleRSI(bt.Strategy):
             # Not yet ... we MIGHT BUY if ...
             if self.rsi[0] > 60:
                 # BUY, BUY, BUY!!! (with all possible default parameters)
-                self.log('BUY CREATE, %.2f' % self.dataclose[0])
+                self.log("BUY CREATE, %.2f" % self.dataclose[0])
                 # Keep track of the created order to avoid a 2nd order
                 size = self.broker.getvalue() / self.dataclose[0]
-                self.order = self.buy(size = size)
-                self.stoploss = self.dataclose[0]*0.99
-                self.takeprofit = self.dataclose[0]*1.03
+                self.order = self.buy(size=size)
+                self.stoploss = self.dataclose[0] * 0.99
+                self.takeprofit = self.dataclose[0] * 1.03
         else:
             if self.dataclose[0] < self.stoploss:
-                self.log('STOP LOSS, %.2f' % self.dataclose[0])
+                self.log("STOP LOSS, %.2f" % self.dataclose[0])
                 self.order = self.sell(size=self.position.size)
             elif self.dataclose[0] > self.takeprofit:
-                self.log('TAKE PROFIT, %.2f' % self.dataclose[0])
+                self.log("TAKE PROFIT, %.2f" % self.dataclose[0])
                 self.order = self.sell(size=self.position.size)
-
-    def stop(self):
-        # calculate the actual returns
-        self.roi = (self.broker.get_value() / self.val_start) - 1.0
-        print('ROI:        {:.2f}%'.format(100.0 * self.roi))                
