@@ -6,6 +6,8 @@ from util.analyzer import AnalyzerSuite
 from strategies.EMA_BUY import *
 import quantstats
 
+riskfreerate = 0.0416
+
 strategy = EMA_BUY
 
 dataname = "./data/raw/5EMA_45BN.csv"
@@ -57,15 +59,15 @@ strat = thestrats[0]
 
 # -----------------------------------------------------------------------------------
 
-print(AnalyzerSuite.returnAnalyzers(AnalyzerSuite, thestrats))
-# Print out the final result
-print("Final Portfolio Value: %.2f" % cerebro.broker.getvalue())
-# Plot the result
-cerebro.plot()
+# print(AnalyzerSuite.returnAnalyzers(AnalyzerSuite, thestrats))
+# # Print out the final result
+# print("Final Portfolio Value: %.2f" % cerebro.broker.getvalue())
+# # Plot the result
+# cerebro.plot()
 
 # -----------------------------------------------------------------------------------
-# # Quantstats
-# portfolio_stats = strat.analyzers.getbyname("PyFolio")
-# returns, positions, transactions, gross_lev = portfolio_stats.get_pf_items()
-# returns.index = returns.index.tz_convert(None)
-# quantstats.reports.html(returns, output="bn_strategy.html", title="BN Sentiment")
+# Quantstats
+portfolio_stats = strat.analyzers.getbyname("PyFolio")
+returns, positions, transactions, gross_lev = portfolio_stats.get_pf_items()
+returns.index = returns.index.tz_convert(None)
+quantstats.reports.html(returns, output="bn_strategy.html", title="BN Sentiment", rf=riskfreerate)
